@@ -1,45 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn:process id="Process_1" isExecutable="false">
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="printerProcess" isExecutable="true">
     <bpmn:startEvent id="StartEvent_075r101" name="every 60 seconds">
       <bpmn:outgoing>SequenceFlow_0dhqpa2</bpmn:outgoing>
-      <bpmn:timerEventDefinition />
+      <bpmn:timerEventDefinition>
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT1M</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0dhqpa2" sourceRef="StartEvent_075r101" targetRef="ServiceTask_0ch81p4" />
-    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server">
+    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server" camunda:class="org.camunda.bpm.PollMailTask">
       <bpmn:incoming>SequenceFlow_0dhqpa2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0y1skjj</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:subProcess id="SubProcess_0lmgh9w">
       <bpmn:incoming>SequenceFlow_0y1skjj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ni29fd</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="mails" camunda:elementVariable="mail" />
       <bpmn:startEvent id="StartEvent_0jblr26">
         <bpmn:outgoing>SequenceFlow_0oue7hf</bpmn:outgoing>
       </bpmn:startEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0oue7hf" sourceRef="StartEvent_0jblr26" targetRef="ServiceTask_15n4kld" />
-      <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file">
+      <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file" camunda:class="org.camunda.bpm.DummyTask">
         <bpmn:incoming>SequenceFlow_0oue7hf</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0ecte1u</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:sequenceFlow id="SequenceFlow_0ecte1u" sourceRef="ServiceTask_15n4kld" targetRef="IntermediateCatchEvent_0yd9ec8" />
-      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_0yd9ec8" name="printed">
-        <bpmn:incoming>SequenceFlow_0ecte1u</bpmn:incoming>
-        <bpmn:outgoing>SequenceFlow_0so141f</bpmn:outgoing>
-        <bpmn:conditionalEventDefinition />
-      </bpmn:intermediateCatchEvent>
-      <bpmn:sequenceFlow id="SequenceFlow_0so141f" sourceRef="IntermediateCatchEvent_0yd9ec8" targetRef="ServiceTask_1ir6amp" />
-      <bpmn:serviceTask id="ServiceTask_1ir6amp" name="delete file">
+      <bpmn:sequenceFlow id="SequenceFlow_0ecte1u" sourceRef="ServiceTask_15n4kld" targetRef="IntermediateCatchEvent_150b94h" />
+      <bpmn:sequenceFlow id="SequenceFlow_0so141f" sourceRef="IntermediateCatchEvent_150b94h" targetRef="ServiceTask_1ir6amp" />
+      <bpmn:serviceTask id="ServiceTask_1ir6amp" name="delete file" camunda:class="org.camunda.bpm.DummyTask">
         <bpmn:incoming>SequenceFlow_0so141f</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0b8quo0</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0b8quo0" sourceRef="ServiceTask_1ir6amp" targetRef="ServiceTask_0tye2l7" />
-      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail">
+      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail" camunda:class="org.camunda.bpm.DummyTask">
         <bpmn:incoming>SequenceFlow_0b8quo0</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0cu4usm</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0cu4usm" sourceRef="ServiceTask_0tye2l7" targetRef="ServiceTask_036e16r" />
-      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester">
+      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester" camunda:class="org.camunda.bpm.DummyTask">
         <bpmn:incoming>SequenceFlow_0cu4usm</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1dve4jw</bpmn:outgoing>
       </bpmn:serviceTask>
@@ -50,18 +47,25 @@
       <bpmn:subProcess id="SubProcess_1juo72k" triggeredByEvent="true">
         <bpmn:startEvent id="StartEvent_0x5s2iv" name="after 60 seconds" isInterrupting="false">
           <bpmn:outgoing>SequenceFlow_0736ul5</bpmn:outgoing>
-          <bpmn:timerEventDefinition />
+          <bpmn:timerEventDefinition>
+            <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+          </bpmn:timerEventDefinition>
         </bpmn:startEvent>
-        <bpmn:task id="Task_178d7p0" name="inform requester">
-          <bpmn:incoming>SequenceFlow_0736ul5</bpmn:incoming>
-          <bpmn:outgoing>SequenceFlow_0jfhbgb</bpmn:outgoing>
-        </bpmn:task>
-        <bpmn:sequenceFlow id="SequenceFlow_0736ul5" sourceRef="StartEvent_0x5s2iv" targetRef="Task_178d7p0" />
+        <bpmn:sequenceFlow id="SequenceFlow_0736ul5" sourceRef="StartEvent_0x5s2iv" targetRef="ServiceTask_0eda9nj" />
         <bpmn:endEvent id="EndEvent_02vgnpr">
           <bpmn:incoming>SequenceFlow_0jfhbgb</bpmn:incoming>
         </bpmn:endEvent>
-        <bpmn:sequenceFlow id="SequenceFlow_0jfhbgb" sourceRef="Task_178d7p0" targetRef="EndEvent_02vgnpr" />
+        <bpmn:sequenceFlow id="SequenceFlow_0jfhbgb" sourceRef="ServiceTask_0eda9nj" targetRef="EndEvent_02vgnpr" />
+        <bpmn:serviceTask id="ServiceTask_0eda9nj" name="inform requester" camunda:class="org.camunda.bpm.DummyTask">
+          <bpmn:incoming>SequenceFlow_0736ul5</bpmn:incoming>
+          <bpmn:outgoing>SequenceFlow_0jfhbgb</bpmn:outgoing>
+        </bpmn:serviceTask>
       </bpmn:subProcess>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_150b94h" name="printed">
+        <bpmn:incoming>SequenceFlow_0ecte1u</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0so141f</bpmn:outgoing>
+        <bpmn:messageEventDefinition messageRef="Message_0yl0urw" />
+      </bpmn:intermediateCatchEvent>
     </bpmn:subProcess>
     <bpmn:sequenceFlow id="SequenceFlow_0y1skjj" sourceRef="ServiceTask_0ch81p4" targetRef="SubProcess_0lmgh9w" />
     <bpmn:endEvent id="EndEvent_045pj7j">
@@ -72,8 +76,9 @@
 </bpmn:textAnnotation>
     <bpmn:association id="Association_0mrl70z" sourceRef="ServiceTask_0ch81p4" targetRef="TextAnnotation_1wj5zc8" />
   </bpmn:process>
+  <bpmn:message id="Message_0yl0urw" name="printed" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="printerProcess">
       <bpmndi:BPMNShape id="StartEvent_075r101_di" bpmnElement="StartEvent_075r101">
         <dc:Bounds x="173" y="102" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -130,12 +135,6 @@
           <dc:Bounds x="664.5" y="24" width="90" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="IntermediateCatchEvent_0yd9ec8_di" bpmnElement="IntermediateCatchEvent_0yd9ec8">
-        <dc:Bounds x="743" y="16" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="716" y="52" width="90" height="20" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0so141f_di" bpmnElement="SequenceFlow_0so141f">
         <di:waypoint xsi:type="dc:Point" x="779" y="34" />
         <di:waypoint xsi:type="dc:Point" x="844" y="34" />
@@ -187,8 +186,6 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1ni29fd_di" bpmnElement="SequenceFlow_1ni29fd">
         <di:waypoint xsi:type="dc:Point" x="1396" y="121" />
-        <di:waypoint xsi:type="dc:Point" x="1434" y="121" />
-        <di:waypoint xsi:type="dc:Point" x="1434" y="121" />
         <di:waypoint xsi:type="dc:Point" x="1461" y="121" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1389" y="111" width="90" height="20" />
@@ -202,9 +199,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="739" y="208" width="90" height="20" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Task_178d7p0_di" bpmnElement="Task_178d7p0">
-        <dc:Bounds x="877" y="150" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_0736ul5_di" bpmnElement="SequenceFlow_0736ul5">
         <di:waypoint xsi:type="dc:Point" x="802" y="190" />
@@ -226,6 +220,15 @@
           <dc:Bounds x="965" y="180" width="90" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_150b94h_di" bpmnElement="IntermediateCatchEvent_150b94h">
+        <dc:Bounds x="743" y="16" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="716" y="52" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0eda9nj_di" bpmnElement="ServiceTask_0eda9nj">
+        <dc:Bounds x="877" y="150" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
