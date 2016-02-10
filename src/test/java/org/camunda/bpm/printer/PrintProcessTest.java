@@ -1,4 +1,4 @@
-package org.camunda.bpm;
+package org.camunda.bpm.printer;
 
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.test.Deployment;
@@ -13,7 +13,7 @@ public class PrintProcessTest {
 
 	@Test
 	@Deployment(resources = "mail-to-printer-process.bpmn")
-	public void ruleUsageExample() {
+	public void happyPath() {
 		RuntimeService runtimeService = processEngineRule.getRuntimeService();
 		runtimeService.startProcessInstanceByKey("printerProcess");
 

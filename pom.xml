@@ -44,13 +44,13 @@
 			<artifactId>camunda-engine</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
-		 <dependency>
-	        <groupId>org.camunda.bpm.extension</groupId>
-	        <artifactId>camunda-bpm-assert</artifactId>
-	        <version>1.2</version>
-	        <scope>test</scope>
-	    </dependency>
+
+		<dependency>
+			<groupId>org.camunda.bpm.extension</groupId>
+			<artifactId>camunda-bpm-assert</artifactId>
+			<version>1.2</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -71,6 +71,24 @@
 			<artifactId>commons-email</artifactId>
 			<version>${version.email}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.5</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

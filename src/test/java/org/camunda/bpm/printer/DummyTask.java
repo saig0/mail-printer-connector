@@ -1,4 +1,4 @@
-package org.camunda.bpm;
+package org.camunda.bpm.printer;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
