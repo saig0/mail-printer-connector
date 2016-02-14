@@ -20,4 +20,4 @@ faces-config.NavData
 
 *.DS_Store
 
-mail.properties
+src/test/resources/mail.properties

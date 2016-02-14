@@ -8,14 +8,14 @@
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="SequenceFlow_0dhqpa2" sourceRef="StartEvent_075r101" targetRef="ServiceTask_0ch81p4" />
-    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server" camunda:class="org.camunda.bpm.printer.PollMailTask">
+    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server" camunda:class="org.camunda.bpm.printer.tasks.PollMailTask">
       <bpmn:incoming>SequenceFlow_0dhqpa2</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0y1skjj</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:subProcess id="SubProcess_0lmgh9w">
       <bpmn:incoming>SequenceFlow_0y1skjj</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_1ni29fd</bpmn:outgoing>
-      <bpmn:multiInstanceLoopCharacteristics camunda:collection="mails" camunda:elementVariable="mail" />
+      <bpmn:multiInstanceLoopCharacteristics camunda:collection="printJobs" camunda:elementVariable="printJob" />
       <bpmn:startEvent id="StartEvent_0jblr26">
         <bpmn:outgoing>SequenceFlow_0oue7hf</bpmn:outgoing>
       </bpmn:startEvent>
@@ -31,12 +31,12 @@
         <bpmn:outgoing>SequenceFlow_0b8quo0</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0b8quo0" sourceRef="ServiceTask_1ir6amp" targetRef="ServiceTask_0tye2l7" />
-      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail" camunda:class="org.camunda.bpm.printer.DummyTask">
+      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail" camunda:class="org.camunda.bpm.printer.tasks.DeleteMessageTask">
         <bpmn:incoming>SequenceFlow_0b8quo0</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0cu4usm</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0cu4usm" sourceRef="ServiceTask_0tye2l7" targetRef="ServiceTask_036e16r" />
-      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester" camunda:class="org.camunda.bpm.printer.DummyTask">
+      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester" camunda:class="org.camunda.bpm.printer.tasks.SendMessageTask">
         <bpmn:incoming>SequenceFlow_0cu4usm</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1dve4jw</bpmn:outgoing>
       </bpmn:serviceTask>

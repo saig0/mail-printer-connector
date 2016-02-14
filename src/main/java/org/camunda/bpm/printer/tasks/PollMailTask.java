@@ -1,4 +1,4 @@
-package org.camunda.bpm.printer;
+package org.camunda.bpm.printer.tasks;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,23 +7,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
+import java.util.Optional;
 
 import javax.mail.Address;
+import javax.mail.Flags.Flag;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.NoSuchProviderException;
 import javax.mail.Part;
-import javax.mail.Session;
-import javax.mail.Store;
 import javax.mail.internet.MimeBodyPart;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.printer.Configuration;
+import org.camunda.bpm.printer.MailService;
+import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,51 +31,31 @@ public class PollMailTask implements JavaDelegate {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PollMailTask.class);
 
+	@Override
 	public void execute(DelegateExecution execution) throws Exception {
 		LOGGER.debug("poll mails from server");
 
-		poll();
+		List<PrintJob> printJobs = poll();
 
-		execution.setVariable("mails", Collections.emptyList());
+		execution.setVariable("printJobs", printJobs);
 	}
 
-	public void poll() throws Exception {
+	public List<PrintJob> poll() throws Exception {
+		List<PrintJob> printJobs = new ArrayList<PrintJob>();
 
-		Store store = connectToServer();
-		Folder folder = openFolder(store);
+		Folder folder = MailService.connect();
 
 		List<Message> messages = Arrays.asList(folder.getMessages());
 		LOGGER.debug("{} mails in folder '{}'", messages.size(), folder.getName());
 
 		for (Message message : messages) {
-			processMessage(message);
+			processMessage(message).ifPresent(printJobs::add);
 		}
 
-		folder.close(true);
-		store.close();
+		return printJobs;
 	}
 
-	private Store connectToServer() throws IOException, NoSuchProviderException, MessagingException {
-		Session session = createSession();
-
-		Store store = session.getStore("imaps");
-		store.connect(MailConfiguration.getHost(), MailConfiguration.getUserName(), MailConfiguration.getPassword());
-		return store;
-	}
-
-	private Session createSession() throws IOException {
-		Properties props = MailConfiguration.getProperties();
-		Session session = Session.getDefaultInstance(props, null);
-		return session;
-	}
-
-	private Folder openFolder(Store store) throws MessagingException, IOException {
-		Folder folder = store.getFolder(Configuration.getFolder());
-		folder.open(Folder.READ_ONLY);
-		return folder;
-	}
-
-	private void processMessage(Message message) throws MessagingException, IOException {
+	private Optional<PrintJob> processMessage(Message message) throws MessagingException, IOException {
 		Address[] fromAddress = message.getFrom();
 		String from = fromAddress[0].toString();
 		String subject = message.getSubject();
@@ -85,7 +65,7 @@ public class PollMailTask implements JavaDelegate {
 
 		if (matchSubject(subject)) {
 
-			List<File> attachFiles = new ArrayList<File>();
+			List<String> attachedFiles = new ArrayList<String>();
 
 			if (message.getContentType().contains("multipart")) {
 				// content may contain attachments
@@ -97,17 +77,22 @@ public class PollMailTask implements JavaDelegate {
 					if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
 
 						File file = saveAttachement(subject, part);
-						attachFiles.add(file);
+						attachedFiles.add(file.getAbsolutePath());
 					}
 				}
 			}
 
-			if (attachFiles.isEmpty()) {
+			message.setFlag(Flag.SEEN, true);
+
+			if (!attachedFiles.isEmpty()) {
+				return Optional.of(new PrintJob(message.getMessageNumber(), from, subject, attachedFiles));
+			} else {
 				LOGGER.warn("ignore message because it doesn't have an attachement");
 			}
 		} else {
 			LOGGER.debug("ignore message because it doesn't match the subject '{}'", Configuration.getSubject());
 		}
+		return Optional.empty();
 	}
 
 	private boolean matchSubject(String subject) throws IOException {

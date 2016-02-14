@@ -38,4 +38,9 @@ public class Configuration {
 		return (String) config.get("subject");
 	}
 
+	public static String getFrom() throws IOException {
+		ensureInitialized();
+		return (String) config.get("from");
+	}
+
 }

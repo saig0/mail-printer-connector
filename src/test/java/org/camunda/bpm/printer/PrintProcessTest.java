@@ -17,6 +17,7 @@ public class PrintProcessTest {
 		RuntimeService runtimeService = processEngineRule.getRuntimeService();
 		runtimeService.startProcessInstanceByKey("printerProcess");
 
+		runtimeService.correlateMessage("printed");
 	}
 
 }
