@@ -43,4 +43,9 @@ public class Configuration {
 		return (String) config.get("from");
 	}
 
+	public static String getPrinterName() throws IOException {
+		ensureInitialized();
+		return (String) config.get("printer.name");
+	}
+
 }
