@@ -84,33 +84,36 @@ public class PrintTask implements JavaDelegate {
 
 			@Override
 			public void printJobRequiresAttention(PrintJobEvent job) {
-				System.out.println("?");
+				LOGGER.warn("print job requires attention: " + job.getPrintJob());
 			}
 
 			@Override
 			public void printJobNoMoreEvents(PrintJobEvent job) {
-				System.out.println("-");
+				LOGGER.debug("no more events for print job '{}' ({})", job.getPrintJob(), job.getPrintEventType());
+
 			}
 
 			@Override
 			public void printJobFailed(PrintJobEvent job) {
 				LOGGER.error("failed to print: " + job.getPrintJob());
+				// TODO notify process
 			}
 
 			@Override
 			public void printJobCompleted(PrintJobEvent job) {
 				LOGGER.debug("successful printed: " + job.getPrintJob());
-				// TODO continue process
+				// TODO notify process
 			}
 
 			@Override
 			public void printJobCanceled(PrintJobEvent job) {
 				LOGGER.warn("canceled print job: " + job.getPrintJob());
+				// TODO notify process
 			}
 
 			@Override
 			public void printDataTransferCompleted(PrintJobEvent job) {
-				System.out.println(".");
+				LOGGER.debug("transfered data for print job: " + job.getPrintJob());
 			}
 		});
 

@@ -16,8 +16,6 @@ public class PrintProcessTest {
 	public void happyPath() {
 		RuntimeService runtimeService = processEngineRule.getRuntimeService();
 		runtimeService.startProcessInstanceByKey("printerProcess");
-
-		// runtimeService.correlateMessage("printed");
 	}
 
 }
