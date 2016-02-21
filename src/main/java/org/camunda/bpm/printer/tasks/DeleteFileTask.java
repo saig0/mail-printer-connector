@@ -2,7 +2,6 @@ package org.camunda.bpm.printer.tasks;
 
 import java.io.File;
 
-import org.assertj.core.util.Files;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.printer.PrintJob;
@@ -21,7 +20,7 @@ public class DeleteFileTask implements JavaDelegate {
 
 			LOGGER.debug("delete file: " + file);
 
-			Files.delete(new File(file));
+			new File(file).delete();
 		}
 	}
 

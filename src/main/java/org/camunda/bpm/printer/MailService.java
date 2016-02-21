@@ -64,8 +64,11 @@ public class MailService {
 
 			folder.close(true);
 			store.close();
+
+			folder = null;
+			store = null;
 		} else {
-			throw new IllegalStateException("not connected yet");
+			// throw new IllegalStateException("not connected yet");
 		}
 	}
 

@@ -43,6 +43,9 @@ public class PollMailTask implements JavaDelegate {
 	public List<PrintJob> poll() throws Exception {
 		List<PrintJob> printJobs = new ArrayList<PrintJob>();
 
+		// re-connect to mail server - otherwise it poll already deleted mails
+		MailService.close();
+
 		Folder folder = MailService.connect();
 
 		List<Message> messages = Arrays.asList(folder.getMessages());

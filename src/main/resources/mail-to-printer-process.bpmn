@@ -46,7 +46,7 @@
     <bpmn:startEvent id="StartEvent_1exlsmc" name="every 60 seconds">
       <bpmn:outgoing>SequenceFlow_0ur4nua</bpmn:outgoing>
       <bpmn:timerEventDefinition>
-        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">R/PT1M</bpmn:timeCycle>
+        <bpmn:timeCycle>R/PT1M</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:startEvent>
     <bpmn:textAnnotation id="TextAnnotation_1wj5zc8">    <bpmn:text>store the attachements in print folder</bpmn:text>
