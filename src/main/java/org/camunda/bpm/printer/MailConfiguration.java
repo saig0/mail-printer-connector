@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+// TODO move config to application.properties
 public class MailConfiguration {
 
 	private static final String PROPERTIES_FILE = "/mail.properties";

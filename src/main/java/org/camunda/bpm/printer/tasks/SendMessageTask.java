@@ -11,15 +11,24 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.printer.Configuration;
 import org.camunda.bpm.printer.MailService;
 import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SendMessageTask implements JavaDelegate {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SendMessageTask.class);
+
+	@Autowired
+	private MailService mailService;
+
+	@Value("${mail.sender:MyPrinter}")
+	private String mailSender;
 
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
@@ -29,8 +38,8 @@ public class SendMessageTask implements JavaDelegate {
 	}
 
 	private void sendMessage(PrintJob printJob) throws IOException, EmailException, MessagingException {
-		Message message = new MimeMessage(MailService.getSession());
-		message.setFrom(new InternetAddress(Configuration.getFrom()));
+		Message message = new MimeMessage(mailService.getSession());
+		message.setFrom(new InternetAddress(mailSender));
 		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(printJob.getFrom()));
 		message.setSubject("Re: " + printJob.getSubject());
 		message.setText("...printed!");

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:process id="printerProcess" isExecutable="true">
-    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server" camunda:class="org.camunda.bpm.printer.tasks.PollMailTask">
+    <bpmn:serviceTask id="ServiceTask_0ch81p4" name="poll mails from server" camunda:delegateExpression="${pollMailTask}">
       <bpmn:incoming>SequenceFlow_0ur4nua</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0y1skjj</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -13,21 +13,21 @@
         <bpmn:outgoing>SequenceFlow_0oue7hf</bpmn:outgoing>
       </bpmn:startEvent>
       <bpmn:sequenceFlow id="SequenceFlow_0oue7hf" sourceRef="StartEvent_0jblr26" targetRef="ServiceTask_15n4kld" />
-      <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file" camunda:class="org.camunda.bpm.printer.tasks.PrintTask">
+      <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file" camunda:delegateExpression="${printTask}">
         <bpmn:incoming>SequenceFlow_0oue7hf</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_14fg38u</bpmn:outgoing>
       </bpmn:serviceTask>
-      <bpmn:serviceTask id="ServiceTask_1ir6amp" name="delete file" camunda:class="org.camunda.bpm.printer.tasks.DeleteFileTask">
+      <bpmn:serviceTask id="ServiceTask_1ir6amp" name="delete file" camunda:delegateExpression="${deleteFileTask}">
         <bpmn:incoming>SequenceFlow_14fg38u</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0b8quo0</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0b8quo0" sourceRef="ServiceTask_1ir6amp" targetRef="ServiceTask_0tye2l7" />
-      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail" camunda:class="org.camunda.bpm.printer.tasks.DeleteMessageTask">
+      <bpmn:serviceTask id="ServiceTask_0tye2l7" name="delete mail" camunda:delegateExpression="${deleteMessageTask}">
         <bpmn:incoming>SequenceFlow_0b8quo0</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_0cu4usm</bpmn:outgoing>
       </bpmn:serviceTask>
       <bpmn:sequenceFlow id="SequenceFlow_0cu4usm" sourceRef="ServiceTask_0tye2l7" targetRef="ServiceTask_036e16r" />
-      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester" camunda:class="org.camunda.bpm.printer.tasks.SendMessageTask">
+      <bpmn:serviceTask id="ServiceTask_036e16r" name="notify requester" camunda:delegateExpression="${sendMessageTask}">
         <bpmn:incoming>SequenceFlow_0cu4usm</bpmn:incoming>
         <bpmn:outgoing>SequenceFlow_1dve4jw</bpmn:outgoing>
       </bpmn:serviceTask>

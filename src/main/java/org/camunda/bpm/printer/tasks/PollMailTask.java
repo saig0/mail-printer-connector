@@ -21,15 +21,27 @@ import javax.mail.internet.MimeBodyPart;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.printer.Configuration;
 import org.camunda.bpm.printer.MailService;
 import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PollMailTask implements JavaDelegate {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PollMailTask.class);
+
+	@Autowired
+	private MailService mailService;
+
+	@Value("${mail.subject:print}")
+	private String mailSubject;
+
+	@Value("${mail.output:print}")
+	private String printDirectory;
 
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
@@ -46,7 +58,7 @@ public class PollMailTask implements JavaDelegate {
 		// re-connect to mail server - otherwise it poll already deleted mails
 		MailService.close();
 
-		Folder folder = MailService.connect();
+		Folder folder = mailService.connect();
 
 		List<Message> messages = Arrays.asList(folder.getMessages());
 		LOGGER.debug("{} mails in folder '{}'", messages.size(), folder.getName());
@@ -93,19 +105,19 @@ public class PollMailTask implements JavaDelegate {
 				LOGGER.warn("ignore message because it doesn't have an attachement");
 			}
 		} else {
-			LOGGER.debug("ignore message because it doesn't match the subject '{}'", Configuration.getSubject());
+			LOGGER.debug("ignore message because it doesn't match the subject '{}'", mailSubject);
 		}
 		return Optional.empty();
 	}
 
 	private boolean matchSubject(String subject) throws IOException {
-		return subject.startsWith(Configuration.getSubject());
+		return subject.startsWith(mailSubject);
 	}
 
 	private File saveAttachement(String subject, MimeBodyPart part) throws MessagingException, IOException {
 		String fileName = part.getFileName();
 
-		Path directory = Paths.get(Configuration.getPrintDirectory());
+		Path directory = Paths.get(printDirectory);
 		if (!Files.exists(directory)) {
 			Files.createDirectories(directory);
 		}

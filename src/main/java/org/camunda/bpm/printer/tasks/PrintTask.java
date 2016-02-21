@@ -21,14 +21,19 @@ import javax.print.event.PrintJobListener;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.printer.Configuration;
 import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PrintTask implements JavaDelegate {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintTask.class);
+
+	@Value("${printer.name:MyPrinter}")
+	private String printerName;
 
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
@@ -61,13 +66,12 @@ public class PrintTask implements JavaDelegate {
 		}
 
 		for (PrintService printService : printServices) {
-			if (Configuration.getPrinterName().equals(printService.getName())) {
+			if (printerName.equals(printService.getName())) {
 				LOGGER.debug("select printer: " + printService.getName());
 				return printService;
 			}
 		}
-		throw new IllegalStateException(
-				"No printer selected. Looking for printer with name: " + Configuration.getPrinterName());
+		throw new IllegalStateException("No printer selected. Looking for printer with name: " + printerName);
 	}
 
 	private void printFile(PrintService printService, File file)

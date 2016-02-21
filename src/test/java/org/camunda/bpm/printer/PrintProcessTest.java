@@ -1,21 +1,30 @@
 package org.camunda.bpm.printer;
 
-import org.camunda.bpm.engine.RuntimeService;
-import org.camunda.bpm.engine.test.Deployment;
-import org.camunda.bpm.engine.test.ProcessEngineRule;
-import org.junit.Rule;
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
 
+import org.camunda.bpm.engine.ManagementService;
+import org.camunda.bpm.engine.runtime.Job;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = { Application.class })
 public class PrintProcessTest {
 
-	@Rule
-	public ProcessEngineRule processEngineRule = new ProcessEngineRule();
+	@Autowired
+	private ManagementService managementService;
 
 	@Test
-	@Deployment(resources = "mail-to-printer-process.bpmn")
 	public void happyPath() {
-		RuntimeService runtimeService = processEngineRule.getRuntimeService();
-		runtimeService.startProcessInstanceByKey("printerProcess");
+		Job timerJob = managementService.createJobQuery().timers().singleResult();
+		assertThat(timerJob, is(notNullValue()));
+
+		managementService.executeJob(timerJob.getId());
 	}
 
 }

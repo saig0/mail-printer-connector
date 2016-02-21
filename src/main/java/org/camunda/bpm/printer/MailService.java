@@ -12,7 +12,10 @@ import javax.mail.Store;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MailService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
@@ -21,7 +24,10 @@ public class MailService {
 	private static Store store = null;
 	private static Folder folder = null;
 
-	public static Session getSession() throws IOException {
+	@Value("${mail.folder:inbox}")
+	private String mailFolder;
+
+	public Session getSession() throws IOException {
 		if (session == null) {
 			LOGGER.debug("open session");
 
@@ -31,7 +37,7 @@ public class MailService {
 		return session;
 	}
 
-	public static Folder connect() throws Exception {
+	public Folder connect() throws Exception {
 		if (store == null && folder == null) {
 			LOGGER.debug("connect to mail server...");
 
@@ -44,7 +50,7 @@ public class MailService {
 		return folder;
 	}
 
-	private static Store connectToServer() throws IOException, NoSuchProviderException, MessagingException {
+	private Store connectToServer() throws IOException, NoSuchProviderException, MessagingException {
 		Session session = getSession();
 
 		Store store = session.getStore("imaps");
@@ -52,8 +58,8 @@ public class MailService {
 		return store;
 	}
 
-	private static Folder openFolder(Store store) throws MessagingException, IOException {
-		Folder folder = store.getFolder(Configuration.getFolder());
+	private Folder openFolder(Store store) throws MessagingException, IOException {
+		Folder folder = store.getFolder(mailFolder);
 		folder.open(Folder.READ_WRITE);
 		return folder;
 	}
