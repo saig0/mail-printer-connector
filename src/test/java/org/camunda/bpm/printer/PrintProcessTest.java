@@ -20,11 +20,19 @@ public class PrintProcessTest {
 	private ManagementService managementService;
 
 	@Test
-	public void happyPath() {
+	public void pollMails() {
 		Job timerJob = managementService.createJobQuery().timers().singleResult();
 		assertThat(timerJob, is(notNullValue()));
 
 		managementService.executeJob(timerJob.getId());
+	}
+
+	@Test
+	public void mailPush() throws Exception {
+		// start mail connector with process application
+
+		// wait for new messages
+		Thread.sleep(30 * 1000);
 	}
 
 }

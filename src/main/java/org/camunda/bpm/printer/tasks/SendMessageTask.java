@@ -11,8 +11,9 @@ import javax.mail.internet.MimeMessage;
 import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.printer.MailService;
+import org.camunda.bpm.printer.MailConfiguration;
 import org.camunda.bpm.printer.PrintJob;
+import org.camunda.bpm.printer.mail.MailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class SendMessageTask implements JavaDelegate {
 		message.setText("...printed!");
 
 		LOGGER.debug("send notification mail '{}' to '{}'", printJob.getSubject(), printJob.getFrom());
-		Transport.send(message);
+		Transport.send(message, MailConfiguration.getUserName(), MailConfiguration.getPassword());
 	}
 
 }

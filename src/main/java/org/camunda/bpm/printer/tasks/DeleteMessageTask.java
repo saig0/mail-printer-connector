@@ -6,8 +6,8 @@ import javax.mail.Message;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
-import org.camunda.bpm.printer.MailService;
 import org.camunda.bpm.printer.PrintJob;
+import org.camunda.bpm.printer.mail.MailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

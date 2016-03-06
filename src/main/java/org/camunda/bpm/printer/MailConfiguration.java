@@ -34,16 +34,6 @@ public class MailConfiguration {
 		return (String) config.get("password");
 	}
 
-	public static String getHost() throws IOException {
-		ensureInitialized();
-		return (String) config.get("mail.smtp.host");
-	}
-
-	public static int getPort() throws IOException {
-		ensureInitialized();
-		return Integer.valueOf((String) config.get("mail.smtp.port"));
-	}
-
 	public static Properties getProperties() throws IOException {
 		ensureInitialized();
 		return config;
