@@ -16,6 +16,7 @@ import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Chromaticity;
 import javax.print.attribute.standard.PageRanges;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
@@ -135,6 +136,12 @@ public class PrintTask implements JavaDelegate {
 		String pagesToPrint = job.getPagesToPrint();
 		if (pagesToPrint != null && !pagesToPrint.isEmpty()) {
 			attributeSet.add(new PageRanges(pagesToPrint));
+		}
+
+		if (job.isColorPrint()) {
+			attributeSet.add(Chromaticity.COLOR);
+		} else {
+			attributeSet.add(Chromaticity.MONOCHROME);
 		}
 
 		return attributeSet;

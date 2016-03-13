@@ -11,7 +11,9 @@ public class PrintJob implements Serializable {
 	private final String from;
 	private final String subject;
 	private final List<String> files;
+	// print options
 	private String pagesToPrint;
+	private boolean colorPrint = false;
 
 	public PrintJob(int messageNumber, String from, String subject, List<String> files) {
 		this.messageNumber = messageNumber;
@@ -42,6 +44,14 @@ public class PrintJob implements Serializable {
 
 	public void setPagesToPrint(String pagesToPrint) {
 		this.pagesToPrint = pagesToPrint;
+	}
+
+	public boolean isColorPrint() {
+		return colorPrint;
+	}
+
+	public void setColorPrint(boolean colorPrint) {
+		this.colorPrint = colorPrint;
 	}
 
 }

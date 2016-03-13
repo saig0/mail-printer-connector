@@ -35,8 +35,11 @@ public class MessageProcessor {
 	@Value("${mail.subject:print}")
 	private String mailSubject;
 
-	@Value("${mail.options.pages:-p}")
+	@Value("${mail.option.pages:-p}")
 	private String pagesOption;
+
+	@Value("${mail.option.color:-c}")
+	private String colorOption;
 
 	public Optional<PrintJob> processMessage(Message message) throws MessagingException, IOException {
 		Address[] fromAddress = message.getFrom();
@@ -115,8 +118,11 @@ public class MessageProcessor {
 				printJob.setPagesToPrint(pagesToPrint);
 
 				LOGGER.debug("print option: page rage = '{}'", pagesToPrint);
-			} else {
-				LOGGER.debug("ingore print option: '{}'", option);
+
+			} else if (option.startsWith(colorOption)) {
+				printJob.setColorPrint(true);
+				LOGGER.debug("print option: color print");
+
 			}
 		}
 	}
