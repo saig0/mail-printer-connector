@@ -16,6 +16,7 @@ import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.PageRanges;
 import javax.print.event.PrintJobEvent;
 import javax.print.event.PrintJobListener;
 
@@ -29,6 +30,42 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PrintTask implements JavaDelegate {
+
+	private final class LoggingPrintJobListener implements PrintJobListener {
+		@Override
+		public void printJobRequiresAttention(PrintJobEvent job) {
+			LOGGER.warn("print job requires attention: " + job.getPrintJob());
+		}
+
+		@Override
+		public void printJobNoMoreEvents(PrintJobEvent job) {
+			LOGGER.debug("no more events for print job '{}' ({})", job.getPrintJob(), job.getPrintEventType());
+
+		}
+
+		@Override
+		public void printJobFailed(PrintJobEvent job) {
+			LOGGER.error("failed to print: " + job.getPrintJob());
+			// TODO notify process
+		}
+
+		@Override
+		public void printJobCompleted(PrintJobEvent job) {
+			LOGGER.debug("successful printed: " + job.getPrintJob());
+			// TODO notify process
+		}
+
+		@Override
+		public void printJobCanceled(PrintJobEvent job) {
+			LOGGER.warn("canceled print job: " + job.getPrintJob());
+			// TODO notify process
+		}
+
+		@Override
+		public void printDataTransferCompleted(PrintJobEvent job) {
+			LOGGER.debug("transfered data for print job: " + job.getPrintJob());
+		}
+	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrintTask.class);
 
@@ -45,7 +82,7 @@ public class PrintTask implements JavaDelegate {
 
 			File file = new File(filePath);
 			if (file.exists()) {
-				printFile(printService, file);
+				printFile(printService, file, printJob);
 			} else {
 				throw new IllegalStateException("file not found: " + file);
 			}
@@ -74,7 +111,7 @@ public class PrintTask implements JavaDelegate {
 		throw new IllegalStateException("No printer selected. Looking for printer with name: " + printerName);
 	}
 
-	private void printFile(PrintService printService, File file)
+	private void printFile(PrintService printService, File file, PrintJob job)
 			throws FileNotFoundException, IOException, PrintException {
 
 		LOGGER.debug("print file: " + file);
@@ -84,46 +121,23 @@ public class PrintTask implements JavaDelegate {
 
 		DocPrintJob printJob = printService.createPrintJob();
 
-		printJob.addPrintJobListener(new PrintJobListener() {
+		printJob.addPrintJobListener(new LoggingPrintJobListener());
 
-			@Override
-			public void printJobRequiresAttention(PrintJobEvent job) {
-				LOGGER.warn("print job requires attention: " + job.getPrintJob());
-			}
-
-			@Override
-			public void printJobNoMoreEvents(PrintJobEvent job) {
-				LOGGER.debug("no more events for print job '{}' ({})", job.getPrintJob(), job.getPrintEventType());
-
-			}
-
-			@Override
-			public void printJobFailed(PrintJobEvent job) {
-				LOGGER.error("failed to print: " + job.getPrintJob());
-				// TODO notify process
-			}
-
-			@Override
-			public void printJobCompleted(PrintJobEvent job) {
-				LOGGER.debug("successful printed: " + job.getPrintJob());
-				// TODO notify process
-			}
-
-			@Override
-			public void printJobCanceled(PrintJobEvent job) {
-				LOGGER.warn("canceled print job: " + job.getPrintJob());
-				// TODO notify process
-			}
-
-			@Override
-			public void printDataTransferCompleted(PrintJobEvent job) {
-				LOGGER.debug("transfered data for print job: " + job.getPrintJob());
-			}
-		});
-
-		printJob.print(doc, new HashPrintRequestAttributeSet());
+		HashPrintRequestAttributeSet attributeSet = configurePrintJob(job);
+		printJob.print(doc, attributeSet);
 
 		inputStream.close();
+	}
+
+	private HashPrintRequestAttributeSet configurePrintJob(PrintJob job) {
+		HashPrintRequestAttributeSet attributeSet = new HashPrintRequestAttributeSet();
+
+		String pagesToPrint = job.getPagesToPrint();
+		if (pagesToPrint != null && !pagesToPrint.isEmpty()) {
+			attributeSet.add(new PageRanges(pagesToPrint));
+		}
+
+		return attributeSet;
 	}
 
 }

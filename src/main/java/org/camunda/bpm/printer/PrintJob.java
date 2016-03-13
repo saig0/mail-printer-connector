@@ -11,6 +11,7 @@ public class PrintJob implements Serializable {
 	private final String from;
 	private final String subject;
 	private final List<String> files;
+	private String pagesToPrint;
 
 	public PrintJob(int messageNumber, String from, String subject, List<String> files) {
 		this.messageNumber = messageNumber;
@@ -33,6 +34,14 @@ public class PrintJob implements Serializable {
 
 	public String getSubject() {
 		return subject;
+	}
+
+	public String getPagesToPrint() {
+		return pagesToPrint;
+	}
+
+	public void setPagesToPrint(String pagesToPrint) {
+		this.pagesToPrint = pagesToPrint;
 	}
 
 }

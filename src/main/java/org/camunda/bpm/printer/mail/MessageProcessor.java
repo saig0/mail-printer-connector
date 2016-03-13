@@ -29,11 +29,14 @@ public class MessageProcessor {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PollMailTask.class);
 
+	@Value("${mail.output:print}")
+	private String printDirectory;
+
 	@Value("${mail.subject:print}")
 	private String mailSubject;
 
-	@Value("${mail.output:print}")
-	private String printDirectory;
+	@Value("${mail.options.pages:-p}")
+	private String pagesOption;
 
 	public Optional<PrintJob> processMessage(Message message) throws MessagingException, IOException {
 		Address[] fromAddress = message.getFrom();
@@ -65,7 +68,8 @@ public class MessageProcessor {
 			message.setFlag(Flag.SEEN, true);
 
 			if (!attachedFiles.isEmpty()) {
-				return Optional.of(new PrintJob(message.getMessageNumber(), from, subject, attachedFiles));
+				PrintJob printJob = createPrintJob(message, from, subject, attachedFiles);
+				return Optional.of(printJob);
 			} else {
 				LOGGER.warn("ignore message because it doesn't have an attachement");
 			}
@@ -76,7 +80,7 @@ public class MessageProcessor {
 	}
 
 	private boolean matchSubject(String subject) throws IOException {
-		return subject.startsWith(mailSubject);
+		return subject.toLowerCase().startsWith(mailSubject.toLowerCase());
 	}
 
 	private File saveAttachement(String subject, MimeBodyPart part) throws MessagingException, IOException {
@@ -93,6 +97,28 @@ public class MessageProcessor {
 		LOGGER.debug("downloaded attachment '{}' and saved in folder '{}'", newFile.getName(),
 				directory.toAbsolutePath());
 		return newFile;
+	}
+
+	private PrintJob createPrintJob(Message message, String from, String subject, List<String> attachedFiles) {
+		PrintJob printJob = new PrintJob(message.getMessageNumber(), from, subject, attachedFiles);
+
+		String options = subject.substring(mailSubject.length());
+		parsePrintOptions(printJob, options);
+		return printJob;
+	}
+
+	private void parsePrintOptions(PrintJob printJob, String options) {
+		for (String option : options.split(" ")) {
+
+			if (option.startsWith(pagesOption)) {
+				String pagesToPrint = option.substring(pagesOption.length() + 1);
+				printJob.setPagesToPrint(pagesToPrint);
+
+				LOGGER.debug("print option: page rage = '{}'", pagesToPrint);
+			} else {
+				LOGGER.debug("ingore print option: '{}'", option);
+			}
+		}
 	}
 
 }
