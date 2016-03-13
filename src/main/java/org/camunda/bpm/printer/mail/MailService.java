@@ -6,13 +6,13 @@ import java.util.Properties;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
-import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 
 import org.camunda.bpm.printer.MailConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +23,9 @@ import com.sun.mail.imap.IMAPStore;
 public class MailService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MailService.class);
+
+	@Autowired
+	private MailConfiguration mailConfiguration;
 
 	private static Session session = null;
 	private static IMAPStore store = null;
@@ -35,7 +38,7 @@ public class MailService {
 		if (session == null) {
 			LOGGER.debug("open session");
 
-			Properties props = MailConfiguration.getProperties();
+			Properties props = mailConfiguration.getProperties();
 			// session = Session.getDefaultInstance(props);
 			session = Session.getInstance(props);
 		}
@@ -59,7 +62,7 @@ public class MailService {
 		Session session = getSession();
 
 		IMAPStore store = (IMAPStore) session.getStore("imaps");
-		store.connect(MailConfiguration.getUserName(), MailConfiguration.getPassword());
+		store.connect(mailConfiguration.getUserName(), mailConfiguration.getPassword());
 
 		if (!store.hasCapability("IDLE")) {
 			throw new IllegalStateException("IDLE not supported");
@@ -109,21 +112,10 @@ public class MailService {
 
 		Store store = folder.getStore();
 		if (store != null && !store.isConnected()) {
-			store.connect(MailConfiguration.getUserName(), MailConfiguration.getPassword());
+			store.connect(mailConfiguration.getUserName(), mailConfiguration.getPassword());
 		}
 
 		openFolder(folder);
-	}
-
-	private static final class MailAuthenticatorExtension extends javax.mail.Authenticator {
-		@Override
-		protected PasswordAuthentication getPasswordAuthentication() {
-			try {
-				return new PasswordAuthentication(MailConfiguration.getUserName(), MailConfiguration.getPassword());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 }

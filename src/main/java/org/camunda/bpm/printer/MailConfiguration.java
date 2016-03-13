@@ -1,42 +1,75 @@
 package org.camunda.bpm.printer;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
-// TODO move config to application.properties
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class MailConfiguration {
 
-	private static final String PROPERTIES_FILE = "/mail.properties";
+	@Value("${mail.smtp.host:smtp.gmail.com}")
+	private String smtpHost;
 
-	private static Properties config;
+	@Value("${mail.smtp.port:465}")
+	private String smtpPort;
 
-	private static void ensureInitialized() throws IOException {
-		if (config == null) {
-			config = new Properties();
+	@Value("${mail.smtp.auth:true}")
+	private String smtpAuth;
 
-			InputStream inputStream = MailConfiguration.class.getResourceAsStream(PROPERTIES_FILE);
-			if (inputStream == null) {
-				throw new RuntimeException("properties not found: " + PROPERTIES_FILE);
-			}
+	@Value("${mail.smtp.ssl.enable:true}")
+	private String smtpSslEnable;
 
-			config.load(inputStream);
-		}
+	@Value("${mail.smtp.socketFactory.port:465}")
+	private String smtpSocketFactoryPort;
+
+	@Value("${mail.smtp.socketFactory.class:javax.net.ssl.SSLSocketFactory}")
+	private String smtpSocketFactoryClass;
+
+	@Value("${mail.imaps.host:imap.gmail.com}")
+	private String imapHost;
+
+	@Value("${mail.imaps.port:993}")
+	private String imapPort;
+
+	@Value("${mail.imaps.timeout:10000}")
+	private String imapsTimeout;
+
+	@Value("${mail.store.protocol:imaps}")
+	private String storeProtocol;
+
+	@Value("${mail.user}")
+	private String user;
+
+	@Value("${mail.password}")
+	private String password;
+
+	public String getUserName() {
+		return user;
 	}
 
-	public static String getUserName() throws IOException {
-		ensureInitialized();
-		return (String) config.get("user");
+	public String getPassword() {
+		return password;
 	}
 
-	public static String getPassword() throws IOException {
-		ensureInitialized();
-		return (String) config.get("password");
-	}
+	public Properties getProperties() {
+		Properties properties = new Properties();
 
-	public static Properties getProperties() throws IOException {
-		ensureInitialized();
-		return config;
+		// smtp
+		properties.put("mail.smtp.host", smtpHost);
+		properties.put("mail.smtp.port", smtpPort);
+		properties.put("mail.smtp.auth", smtpAuth);
+		properties.put("mail.smtp.ssl.enable", smtpSslEnable);
+		properties.put("mail.smtp.socketFactory.port", smtpSocketFactoryPort);
+		properties.put("mail.smtp.socketFactory.class", smtpSocketFactoryClass);
+
+		// imap
+		properties.put("mail.imaps.host", imapHost);
+		properties.put("mail.imaps.port", imapPort);
+		properties.put("mail.store.protocol", storeProtocol);
+		properties.put("mail.imaps.timeout", imapsTimeout);
+
+		return properties;
 	}
 
 }

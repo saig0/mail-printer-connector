@@ -28,6 +28,9 @@ public class SendMessageTask implements JavaDelegate {
 	@Autowired
 	private MailService mailService;
 
+	@Autowired
+	private MailConfiguration mailConfiguration;
+
 	@Value("${mail.sender:MyPrinter}")
 	private String mailSender;
 
@@ -46,7 +49,7 @@ public class SendMessageTask implements JavaDelegate {
 		message.setText("...printed!");
 
 		LOGGER.debug("send notification mail '{}' to '{}'", printJob.getSubject(), printJob.getFrom());
-		Transport.send(message, MailConfiguration.getUserName(), MailConfiguration.getPassword());
+		Transport.send(message, mailConfiguration.getUserName(), mailConfiguration.getPassword());
 	}
 
 }
