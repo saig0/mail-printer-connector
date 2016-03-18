@@ -16,7 +16,7 @@
       <bpmn:incoming>SequenceFlow_14fg38u</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_0b8quo0</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file" camunda:delegateExpression="${printTask}">
+    <bpmn:serviceTask id="ServiceTask_15n4kld" name="print file" camunda:delegateExpression="${cupsPrintTask}">
       <bpmn:incoming>SequenceFlow_0oue7hf</bpmn:incoming>
       <bpmn:outgoing>SequenceFlow_14fg38u</bpmn:outgoing>
     </bpmn:serviceTask>
