@@ -49,37 +49,53 @@ public class MessageProcessor {
 
 		LOGGER.debug("process message '{}' from '{}' received '{}'", subject, from, sentDate);
 
-		if (matchSubject(subject)) {
+		if (!alreayProcessed(message)) {
+			if (matchSubject(subject)) {
 
-			List<String> attachedFiles = new ArrayList<String>();
+				message.setFlag(Flag.SEEN, true);
 
-			if (message.getContentType().contains("multipart")) {
-				// content may contain attachments
-				Multipart multiPart = (Multipart) message.getContent();
-				int numberOfParts = multiPart.getCount();
-				for (int partCount = 0; partCount < numberOfParts; partCount++) {
+				List<String> attachedFiles = processMessageAttachments(message, subject);
+				if (!attachedFiles.isEmpty()) {
 
-					MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
-					if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+					PrintJob printJob = createPrintJob(message, from, subject, attachedFiles);
+					return Optional.of(printJob);
 
-						File file = saveAttachement(subject, part);
-						attachedFiles.add(file.getAbsolutePath());
-					}
+				} else {
+					LOGGER.warn("ignore message because it doesn't have an attachement");
 				}
-			}
 
-			message.setFlag(Flag.SEEN, true);
-
-			if (!attachedFiles.isEmpty()) {
-				PrintJob printJob = createPrintJob(message, from, subject, attachedFiles);
-				return Optional.of(printJob);
 			} else {
-				LOGGER.warn("ignore message because it doesn't have an attachement");
+				LOGGER.debug("ignore message because it doesn't match the subject '{}'", mailSubject);
 			}
 		} else {
-			LOGGER.debug("ignore message because it doesn't match the subject '{}'", mailSubject);
+			LOGGER.debug("ignore message because it is already processed '{}'", mailSubject);
 		}
 		return Optional.empty();
+	}
+
+	private List<String> processMessageAttachments(Message message, String subject)
+			throws MessagingException, IOException {
+		List<String> attachedFiles = new ArrayList<String>();
+
+		if (message.getContentType().contains("multipart")) {
+			// content may contain attachments
+			Multipart multiPart = (Multipart) message.getContent();
+			int numberOfParts = multiPart.getCount();
+			for (int partCount = 0; partCount < numberOfParts; partCount++) {
+
+				MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
+				if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
+
+					File file = saveAttachement(subject, part);
+					attachedFiles.add(file.getAbsolutePath());
+				}
+			}
+		}
+		return attachedFiles;
+	}
+
+	private boolean alreayProcessed(Message message) throws MessagingException {
+		return message.isSet(Flag.SEEN);
 	}
 
 	private boolean matchSubject(String subject) throws IOException {
