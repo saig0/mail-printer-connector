@@ -9,8 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.camunda.bpm.printer.PrintJob;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PrintFileCommand {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PrintFileCommand.class);
 
 	private static final String JOB_PREFIX = "request id is";
 
@@ -26,6 +30,8 @@ public class PrintFileCommand {
 
 	public String printFile(PrintJob printJob) throws IOException {
 		List<String> command = buildCommand(printJob);
+
+		LOGGER.debug("run print command: {}", command);
 
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 
@@ -48,6 +54,12 @@ public class PrintFileCommand {
 			arguments.add(option);
 		});
 
+		String pagesToPrint = printJob.getPagesToPrint();
+		if (pagesToPrint != null && !pagesToPrint.isEmpty()) {
+			arguments.add("-P");
+			arguments.add(pagesToPrint);
+		}
+
 		arguments.add(file.toString());
 		return arguments;
 	}
@@ -59,11 +71,6 @@ public class PrintFileCommand {
 			options.add("ColorMode=RGB");
 		} else {
 			options.add("ColorMode=KGray");
-		}
-
-		String pagesToPrint = printJob.getPagesToPrint();
-		if (pagesToPrint != null && !pagesToPrint.isEmpty()) {
-			options.add("page-rage=" + pagesToPrint);
 		}
 
 		return options;

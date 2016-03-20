@@ -111,7 +111,7 @@ public class MessageProcessor {
 	}
 
 	private void parsePrintOptions(PrintJob printJob, String options) {
-		for (String option : options.split(" ")) {
+		for (String option : options.toLowerCase().split(" ")) {
 
 			if (option.startsWith(pagesOption)) {
 				String pagesToPrint = option.substring(pagesOption.length() + 1);
