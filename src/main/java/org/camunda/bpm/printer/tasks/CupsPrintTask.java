@@ -51,7 +51,7 @@ public class CupsPrintTask implements JavaDelegate {
 	private void printFile(File file, PrintJob printJob) throws IOException {
 		LOGGER.debug("print file '{}' on printer '{}'", file, printerName);
 
-		String jobId = new PrintFileCommand(printerName, file).printFile();
+		String jobId = new PrintFileCommand(printerName, file).printFile(printJob);
 		LOGGER.debug("created print job with id '{}'", jobId);
 	}
 
