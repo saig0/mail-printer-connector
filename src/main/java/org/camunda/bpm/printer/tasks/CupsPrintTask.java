@@ -2,6 +2,7 @@ package org.camunda.bpm.printer.tasks;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
@@ -29,30 +30,37 @@ public class CupsPrintTask implements JavaDelegate {
 		List<String> printerNames = new GetPrintersCommand().getPrinters();
 
 		if (printerNames.contains(printerName)) {
-			printFiles(printJob);
+			List<String> jobIds = printFiles(printJob);
+			execution.setVariable("jobIds", jobIds);
 
-		} else {
+		} else
 			LOGGER.error("no printer found with name '{}'. Avaiable printers: {}", printerName, printerNames);
-		}
 	}
 
-	private void printFiles(PrintJob printJob) throws IOException {
+	private List<String> printFiles(PrintJob printJob) throws IOException {
+		List<String> jobIds = new ArrayList<>();
+
 		for (String filePath : printJob.getFiles()) {
 
 			File file = new File(filePath);
 			if (file.exists()) {
-				printFile(file, printJob);
+				String jobId = printFile(file, printJob);
+				jobIds.add(jobId);
+
 			} else {
 				throw new IllegalStateException("file not found: " + file);
 			}
 		}
+		return jobIds;
 	}
 
-	private void printFile(File file, PrintJob printJob) throws IOException {
+	private String printFile(File file, PrintJob printJob) throws IOException {
 		LOGGER.debug("print file '{}' on printer '{}'", file, printerName);
 
 		String jobId = new PrintFileCommand(printerName, file).printFile(printJob);
 		LOGGER.debug("created print job with id '{}'", jobId);
+
+		return jobId;
 	}
 
 }

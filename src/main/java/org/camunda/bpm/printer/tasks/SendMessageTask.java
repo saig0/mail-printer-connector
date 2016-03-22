@@ -10,6 +10,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.printer.MailConfiguration;
 import org.camunda.bpm.printer.PrintJob;
@@ -34,19 +35,23 @@ public class SendMessageTask implements JavaDelegate {
 	@Value("${mail.sender:MyPrinter}")
 	private String mailSender;
 
+	private Expression text;
+
 	@Override
 	public void execute(DelegateExecution execution) throws Exception {
 		PrintJob printJob = (PrintJob) execution.getVariable("printJob");
+		String messageContent = (String) text.getValue(execution);
 
-		sendMessage(printJob);
+		sendMessage(printJob, messageContent);
 	}
 
-	private void sendMessage(PrintJob printJob) throws IOException, EmailException, MessagingException {
+	private void sendMessage(PrintJob printJob, String messageContent)
+			throws IOException, EmailException, MessagingException {
 		Message message = new MimeMessage(mailService.getSession());
 		message.setFrom(new InternetAddress(mailSender));
 		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(printJob.getFrom()));
 		message.setSubject("Re: " + printJob.getSubject());
-		message.setText("...printed!");
+		message.setText(messageContent);
 
 		LOGGER.debug("send notification mail '{}' to '{}'", printJob.getSubject(), printJob.getFrom());
 		Transport.send(message, mailConfiguration.getUserName(), mailConfiguration.getPassword());
