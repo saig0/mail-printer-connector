@@ -50,7 +50,6 @@ public class ImapMailConnector {
 			@Override
 			public void messagesAdded(MessageCountEvent event) {
 				List<Message> messages = Arrays.asList(event.getMessages());
-
 				processMessages(folder, messages);
 			}
 
@@ -66,6 +65,8 @@ public class ImapMailConnector {
 	private void processMessages(IMAPFolder folder, List<Message> messages) {
 		try {
 			LOGGER.debug("{} mails in folder '{}'", messages.size(), folder.getName());
+
+			mailService.ensureOpen(folder);
 
 			for (Message message : messages) {
 				messageProcessor.processMessage(message).ifPresent(this::startProcessInstance);

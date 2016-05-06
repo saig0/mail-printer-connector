@@ -1,6 +1,5 @@
 package org.camunda.bpm.printer.mail;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Flags.Flag;
 import javax.mail.Message;
@@ -18,7 +18,6 @@ import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 
 import org.camunda.bpm.printer.PrintJob;
-import org.camunda.bpm.printer.tasks.PollMailTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageProcessor {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PollMailTask.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MessageProcessor.class);
 
 	@Value("${mail.output:print}")
 	private String printDirectory;
@@ -86,9 +85,16 @@ public class MessageProcessor {
 				MimeBodyPart part = (MimeBodyPart) multiPart.getBodyPart(partCount);
 				if (Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition())) {
 
-					File file = saveAttachement(subject, part);
-					attachedFiles.add(file.getAbsolutePath());
+					Path file = saveAttachement(part.getFileName(), part.getDataHandler());
+					attachedFiles.add(file.toAbsolutePath().toString());
 				}
+			}
+		} else {
+			// assuming a single file (e.g. a PDF)
+			if (Part.ATTACHMENT.equalsIgnoreCase(message.getDisposition())) {
+
+				Path file = saveAttachement(message.getFileName(), message.getDataHandler());
+				attachedFiles.add(file.toAbsolutePath().toString());
 			}
 		}
 		return attachedFiles;
@@ -102,18 +108,18 @@ public class MessageProcessor {
 		return subject.toLowerCase().startsWith(mailSubject.toLowerCase());
 	}
 
-	private File saveAttachement(String subject, MimeBodyPart part) throws MessagingException, IOException {
-		String fileName = part.getFileName();
+	private Path saveAttachement(String fileName, DataHandler dataHandler) throws MessagingException, IOException {
 
 		Path directory = Paths.get(printDirectory);
 		if (!Files.exists(directory)) {
 			Files.createDirectories(directory);
 		}
 
-		File newFile = new File(directory.toFile(), fileName);
-		part.saveFile(newFile);
+		Path newFile = directory.resolve(fileName);
 
-		LOGGER.debug("downloaded attachment '{}' and saved in folder '{}'", newFile.getName(),
+		Files.copy(dataHandler.getInputStream(), newFile);
+
+		LOGGER.debug("downloaded attachment '{}' and saved in folder '{}'", newFile.getFileName(),
 				directory.toAbsolutePath());
 		return newFile;
 	}
