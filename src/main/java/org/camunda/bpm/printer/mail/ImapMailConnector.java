@@ -9,6 +9,7 @@ import javax.mail.MessagingException;
 import javax.mail.event.MessageCountAdapter;
 import javax.mail.event.MessageCountEvent;
 
+import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.printer.PrintJob;
@@ -72,7 +73,7 @@ public class ImapMailConnector {
 				messageProcessor.processMessage(message).ifPresent(this::startProcessInstance);
 			}
 
-		} catch (MessagingException | IOException e) {
+		} catch (MessagingException | IOException | EmailException e) {
 			LOGGER.error("try to process new messages", e);
 		}
 	}

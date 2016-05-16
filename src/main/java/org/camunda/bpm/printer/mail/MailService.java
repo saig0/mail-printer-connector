@@ -4,11 +4,16 @@ import java.io.IOException;
 import java.util.Properties;
 
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.printer.MailConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +38,9 @@ public class MailService {
 
 	@Value("${mail.folder:inbox}")
 	private String mailFolder;
+
+	@Value("${mail.sender:MyPrinter}")
+	private String mailSender;
 
 	public Session getSession() throws IOException {
 		if (session == null) {
@@ -116,6 +124,18 @@ public class MailService {
 		}
 
 		openFolder(folder);
+	}
+
+	public void sendMessage(String to, String subject, String messageContent)
+			throws IOException, EmailException, MessagingException {
+		Message message = new MimeMessage(getSession());
+		message.setFrom(new InternetAddress(mailSender));
+		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+		message.setSubject("Re: " + subject);
+		message.setText(messageContent);
+
+		LOGGER.debug("send mail '{}' to '{}'", subject, to);
+		Transport.send(message, mailConfiguration.getUserName(), mailConfiguration.getPassword());
 	}
 
 }

@@ -17,9 +17,11 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 
+import org.apache.commons.mail.EmailException;
 import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -34,13 +36,10 @@ public class MessageProcessor {
 	@Value("${mail.subject:print}")
 	private String mailSubject;
 
-	@Value("${mail.option.pages:-p}")
-	private String pagesOption;
+	@Autowired
+	private MailService mailService;
 
-	@Value("${mail.option.color:-c}")
-	private String colorOption;
-
-	public Optional<PrintJob> processMessage(Message message) throws MessagingException, IOException {
+	public Optional<PrintJob> processMessage(Message message) throws MessagingException, IOException, EmailException {
 		Address[] fromAddress = message.getFrom();
 		String from = fromAddress[0].toString();
 		String subject = message.getSubject();
@@ -62,6 +61,16 @@ public class MessageProcessor {
 				} else {
 					LOGGER.warn("ignore message because it doesn't have an attachement");
 				}
+
+			} else if ("help".equalsIgnoreCase(subject)) {
+				mailService.sendMessage(from, "Re: " + subject,
+						"To print a file, send a mail with the subject '" + mailSubject + "'. "
+								+ "You can add the following options:\n"
+								+ "\t-p prints only the given pages (e.g. '-p=1', '-p=1,2', '-p=1-3')\n"
+								+ "\t-c prints with colors instead of gray scale\n\n" + "Example:\n" + "\t"
+								+ mailSubject + " -p=1 -c");
+
+				message.setFlag(Flag.DELETED, true);
 
 			} else {
 				LOGGER.debug("ignore message because it doesn't match the subject '{}'", mailSubject);
@@ -135,13 +144,13 @@ public class MessageProcessor {
 	private void parsePrintOptions(PrintJob printJob, String options) {
 		for (String option : options.toLowerCase().split(" ")) {
 
-			if (option.startsWith(pagesOption)) {
-				String pagesToPrint = option.substring(pagesOption.length() + 1);
+			if (option.startsWith("-p=")) {
+				String pagesToPrint = option.substring(3);
 				printJob.setPagesToPrint(pagesToPrint);
 
 				LOGGER.debug("print option: page rage = '{}'", pagesToPrint);
 
-			} else if (option.startsWith(colorOption)) {
+			} else if (option.startsWith("-c=")) {
 				printJob.setColorPrint(true);
 				LOGGER.debug("print option: color print");
 
