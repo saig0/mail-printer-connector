@@ -48,11 +48,13 @@ public class MessageProcessor {
 		LOGGER.debug("process message '{}' from '{}' received '{}'", subject, from, sentDate);
 
 		if (!alreayProcessed(message)) {
+
 			if (matchSubject(subject)) {
+
+				List<String> attachedFiles = processMessageAttachments(message, subject);
 
 				message.setFlag(Flag.SEEN, true);
 
-				List<String> attachedFiles = processMessageAttachments(message, subject);
 				if (!attachedFiles.isEmpty()) {
 
 					PrintJob printJob = createPrintJob(message, from, subject, attachedFiles);

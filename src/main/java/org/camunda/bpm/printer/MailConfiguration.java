@@ -69,6 +69,12 @@ public class MailConfiguration {
 		properties.put("mail.store.protocol", storeProtocol);
 		properties.put("mail.imaps.timeout", imapsTimeout);
 
+		// disable partial fetching or increase the fetch size for large
+		// attachments
+		properties.put("mail.imap.partialfetch", "false");
+		// properties.put("mail.imap.partialfetch", "true");
+		// properties.put("mail.imap.fetchsize", "819200");
+
 		return properties;
 	}
 
