@@ -23,6 +23,7 @@ import javax.print.event.PrintJobListener;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.extension.mail.dto.Attachment;
 import org.camunda.bpm.printer.PrintJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PrintTask implements JavaDelegate {
+public class JavaPrintTask implements JavaDelegate {
 
 	private final class LoggingPrintJobListener implements PrintJobListener {
 		@Override
@@ -68,7 +69,7 @@ public class PrintTask implements JavaDelegate {
 		}
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PrintTask.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(JavaPrintTask.class);
 
 	@Value("${printer.name:MyPrinter}")
 	private String printerName;
@@ -79,9 +80,9 @@ public class PrintTask implements JavaDelegate {
 
 		PrintService printService = getPrintService();
 
-		for (String filePath : printJob.getFiles()) {
+		for (Attachment attachment : printJob.getMail().getAttachments()) {
 
-			File file = new File(filePath);
+			File file = new File(attachment.getPath());
 			if (file.exists()) {
 				printFile(printService, file, printJob);
 			} else {

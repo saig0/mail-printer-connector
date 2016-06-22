@@ -1,41 +1,25 @@
 package org.camunda.bpm.printer;
 
 import java.io.Serializable;
-import java.util.List;
+
+import org.camunda.bpm.extension.mail.dto.Mail;
 
 public class PrintJob implements Serializable {
 
 	private static final long serialVersionUID = -2522993700692476834L;
 
-	private final int messageNumber;
-	private final String from;
-	private final String subject;
-	private final List<String> files;
+	private final Mail mail;
+
 	// print options
 	private String pagesToPrint;
 	private boolean colorPrint = false;
 
-	public PrintJob(int messageNumber, String from, String subject, List<String> files) {
-		this.messageNumber = messageNumber;
-		this.from = from;
-		this.subject = subject;
-		this.files = files;
+	public PrintJob(Mail mail) {
+		this.mail = mail;
 	}
 
-	public List<String> getFiles() {
-		return files;
-	}
-
-	public int getMessageNumber() {
-		return messageNumber;
-	}
-
-	public String getFrom() {
-		return from;
-	}
-
-	public String getSubject() {
-		return subject;
+	public Mail getMail() {
+		return mail;
 	}
 
 	public String getPagesToPrint() {
@@ -52,6 +36,11 @@ public class PrintJob implements Serializable {
 
 	public void setColorPrint(boolean colorPrint) {
 		this.colorPrint = colorPrint;
+	}
+
+	@Override
+	public String toString() {
+		return "PrintJob [mail=" + mail + ", pagesToPrint=" + pagesToPrint + ", colorPrint=" + colorPrint + "]";
 	}
 
 }
