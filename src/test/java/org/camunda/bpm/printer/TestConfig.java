@@ -19,11 +19,12 @@ import com.icegreen.greenmail.util.ServerSetupTest;
 		@ComponentScan.Filter(type = FilterType.REGEX, pattern = "org.camunda.bpm.printer.cups.*")})
 public class TestConfig {
 
-	@Bean
+	@Bean(destroyMethod = "stop")
 	public GreenMail greenMail() {
 		GreenMail greenMail = new GreenMail(ServerSetupTest.ALL);
-		greenMail.setUser("test@camunda.com", "bpmn");
 				
+		greenMail.setUser("test@camunda.com", "bpmn");
+		
 		greenMail.start();
 		
 		return greenMail;

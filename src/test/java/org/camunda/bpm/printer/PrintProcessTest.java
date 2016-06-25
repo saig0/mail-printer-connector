@@ -26,11 +26,12 @@ import org.camunda.bpm.engine.runtime.JobQuery;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.extension.mail.MailContentType;
 import org.camunda.bpm.printer.cups.PrinterService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.icegreen.greenmail.store.FolderException;
@@ -39,6 +40,7 @@ import com.icegreen.greenmail.util.GreenMailUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = { TestConfig.class })
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PrintProcessTest {
 
 	@Autowired
@@ -52,7 +54,7 @@ public class PrintProcessTest {
 	
 	@Autowired
 	private PrinterService printerService;
-	
+		
 	@Test
 	public void printAttachment() throws Exception {
 
@@ -91,38 +93,73 @@ public class PrintProcessTest {
 	}
 	
 	@Test
-	@Ignore("TODO")
 	public void noPrinter() throws Exception {
 
 		when(printerService.getPrinterNames()).thenReturn(Collections.emptyList());
 		
-		// TODO write the test
+		sendMessageWithAttachment();
+
+		greenMail.waitForIncomingEmail(2);
+		
+		waitForProcessEnd();
+		
+		MimeMessage[] mails = greenMail.getReceivedMessages();
+	    assertThat(mails).hasSize(2);
+
+	    MimeMessage mail = mails[0];
+	    assertThat(mail.getSubject()).isEqualTo("print");
+	    assertThat(mail.isSet(Flag.DELETED)).isFalse();
+	    
+	    mail = mails[1];
+	    assertThat(mail.getSubject()).isEqualTo("RE: print");
+	    assertThat(GreenMailUtil.getBody(mail)).startsWith("Error occurred: NO_PRINTER.");
 	}
 	
 	@Test
-	@Ignore("TODO")
 	public void noAttachment() throws Exception {
 
-		// TODO write the test
-	}
-	
-	@Test
-	@Ignore("TODO")
-	public void multipleAttachment() throws Exception {
+		sendMessage("print");
+		
+		greenMail.waitForIncomingEmail(2);
+		
+		waitForProcessEnd();
+		
+		MimeMessage[] mails = greenMail.getReceivedMessages();
+	    assertThat(mails).hasSize(2);
 
-		// TODO write the test
+	    MimeMessage mail = mails[0];
+	    assertThat(mail.getSubject()).isEqualTo("print");
+	    assertThat(mail.isSet(Flag.DELETED)).isTrue();
+	    
+	    mail = mails[1];
+	    assertThat(mail.getSubject()).isEqualTo("RE: print");
+	    assertThat(GreenMailUtil.getBody(mail)).isEqualTo("Please add attachment to mail.");
 	}
 	
 	@Test
-	@Ignore("TODO")
 	public void help() throws Exception {
 
-		// TODO write the test
+		sendMessage("help");
+		
+		greenMail.waitForIncomingEmail(2);
+		
+		waitForProcessEnd();
+		
+		MimeMessage[] mails = greenMail.getReceivedMessages();
+	    assertThat(mails).hasSize(2);
+
+	    MimeMessage mail = mails[0];
+	    assertThat(mail.getSubject()).isEqualTo("help");
+	    assertThat(mail.isSet(Flag.DELETED)).isTrue();
+	    
+	    mail = mails[1];
+	    assertThat(mail.getSubject()).isEqualTo("RE: help");
+	    assertThat(GreenMailUtil.getBody(mail)).startsWith("To print a file");
 	}
 
 	private void sendMessageWithAttachment() throws MessagingException, AddressException, FolderException {
 		Session smtpSession = greenMail.getSmtp().createSession();
-		MimeMessage message = createMimeMessage(smtpSession);
+		MimeMessage message = createMimeMessage(smtpSession, "print");
 
 		message.setContent("", MailContentType.TEXT_PLAIN.getType());
 		message.setFileName("attachment.pdf");
@@ -131,14 +168,22 @@ public class PrintProcessTest {
 		GreenMailUtil.sendMimeMessage(message);
 	}
 
-	private MimeMessage createMimeMessage(Session session) throws MessagingException, AddressException {
+	private MimeMessage createMimeMessage(Session session, String subject) throws MessagingException, AddressException {
 		MimeMessage message = new MimeMessage(session);
 
 		message.setFrom(new InternetAddress("from@camunda.com"));
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("test@camunda.com"));
-		message.setSubject("print");
+		message.setSubject(subject);
 
 		return message;
+	}
+	
+	private void sendMessage(String subject) throws MessagingException, AddressException {
+		Session smtpSession = greenMail.getSmtp().createSession();
+		MimeMessage message = createMimeMessage(smtpSession, subject);
+		message.setContent("", MailContentType.TEXT_PLAIN.getType());
+		
+		GreenMailUtil.sendMimeMessage(message);
 	}
 
 	private void waitForTimerJob() throws Exception {

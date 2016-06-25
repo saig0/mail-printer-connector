@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.camunda.bpm.engine.delegate.BpmnError;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.extension.mail.dto.Attachment;
@@ -38,6 +39,8 @@ public class CupsPrintTask implements JavaDelegate {
 
 		} else {
 			LOGGER.error("no printer found with name '{}'. Avaiable printers: {}", printerName, printerNames);
+			
+			throw new BpmnError("NO_PRINTER", "No printer with name: "+ printerName);
 		}
 	}
 

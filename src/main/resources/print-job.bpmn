@@ -118,6 +118,31 @@
     <bpmn:sequenceFlow id="SequenceFlow_1s01qt2" sourceRef="ServiceTask_1ir6amp" targetRef="ServiceTask_036e16r" />
     <bpmn:sequenceFlow id="SequenceFlow_19tz6bc" sourceRef="ServiceTask_15n4kld" targetRef="ServiceTask_0tye2l7" />
     <bpmn:sequenceFlow id="SequenceFlow_1rw9o1l" sourceRef="ServiceTask_0tye2l7" targetRef="SubProcess_193nw04" />
+    <bpmn:subProcess id="SubProcess_0nummc8" triggeredByEvent="true">
+      <bpmn:startEvent id="StartEvent_0d5y6ho">
+        <bpmn:outgoing>SequenceFlow_1aqvika</bpmn:outgoing>
+        <bpmn:errorEventDefinition camunda:errorCodeVariable="errorCode" />
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_1aqvika" sourceRef="StartEvent_0d5y6ho" targetRef="ServiceTask_01fves4" />
+      <bpmn:endEvent id="EndEvent_11ie9no">
+        <bpmn:incoming>SequenceFlow_0zbt43k</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="SequenceFlow_0zbt43k" sourceRef="ServiceTask_01fves4" targetRef="EndEvent_11ie9no" />
+      <bpmn:serviceTask id="ServiceTask_01fves4" name="send error mail" camunda:asyncBefore="true">
+        <bpmn:extensionElements>
+          <camunda:connector>
+            <camunda:inputOutput>
+              <camunda:inputParameter name="to">${printJob.mail.from}</camunda:inputParameter>
+              <camunda:inputParameter name="subject"><![CDATA[${'RE: '.concat(printJob.mail.subject)}]]></camunda:inputParameter>
+              <camunda:inputParameter name="text"><![CDATA[${'Error occurred: '.concat(errorCode).concat('. Please inform the admin.')}]]></camunda:inputParameter>
+            </camunda:inputOutput>
+            <camunda:connectorId>mail-send</camunda:connectorId>
+          </camunda:connector>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1aqvika</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0zbt43k</bpmn:outgoing>
+      </bpmn:serviceTask>
+    </bpmn:subProcess>
   </bpmn:process>
   <bpmn:message id="Message_0yl0urw" name="printed" />
   <bpmn:message id="Message_1skd326" name="newPrintJob" />
@@ -301,6 +326,38 @@
           <dc:Bounds x="546" y="514" width="90" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="SubProcess_0nummc8_di" bpmnElement="SubProcess_0nummc8" isExpanded="true">
+        <dc:Bounds x="175" y="728" width="332" height="126" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0d5y6ho_di" bpmnElement="StartEvent_0d5y6ho">
+        <dc:Bounds x="198" y="770" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="171" y="806" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1aqvika_di" bpmnElement="SequenceFlow_1aqvika">
+        <di:waypoint xsi:type="dc:Point" x="234" y="788" />
+        <di:waypoint xsi:type="dc:Point" x="299" y="788" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="223.5" y="778" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_11ie9no_di" bpmnElement="EndEvent_11ie9no">
+        <dc:Bounds x="449" y="770" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="422" y="806" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0zbt43k_di" bpmnElement="SequenceFlow_0zbt43k">
+        <di:waypoint xsi:type="dc:Point" x="399" y="788" />
+        <di:waypoint xsi:type="dc:Point" x="449" y="788" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="381" y="778" width="90" height="20" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_01fves4_di" bpmnElement="ServiceTask_01fves4">
+        <dc:Bounds x="299" y="748" width="100" height="80" />
+      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
