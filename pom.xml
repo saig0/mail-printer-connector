@@ -49,7 +49,13 @@
 		<dependency>
 			<groupId>org.camunda.bpm.extension</groupId>
 			<artifactId>camunda-bpm-spring-boot-starter</artifactId>
-			<version>1.2.0</version>
+			<version>1.1.0</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-email</artifactId>
+					<groupId>org.apache.commons</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<dependency>
@@ -121,6 +127,7 @@
 	        <groupId>com.icegreen</groupId>
 	        <artifactId>greenmail</artifactId>
 	        <version>1.5.0</version>
+	        <scope>test</scope>
        </dependency>
 		
 	</dependencies>
