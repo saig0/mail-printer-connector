@@ -4,6 +4,7 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.camunda.bpm.extension.mail.dto.Mail;
 import org.camunda.bpm.printer.PrintJob;
+import org.camunda.bpm.printer.PrintJob.Orientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,8 +36,15 @@ public class CreatePrintJob implements JavaDelegate {
 				String pagesToPrint = option.substring(3);
 				printJob.setPagesToPrint(pagesToPrint);
 
-			} else if (option.startsWith("-c=")) {
+			} else if (option.startsWith("-n=")) {
+				int numberOfCopies = Integer.parseInt(option.substring(3));
+				printJob.setNumberOfCopies(numberOfCopies);
+			
+			} else if (option.startsWith("-c")) {
 				printJob.setColorPrint(true);
+			
+			} else if (option.startsWith("-l")) {
+				printJob.setOrientation(Orientation.LANDSCAPE);
 			}
 		}
 	}

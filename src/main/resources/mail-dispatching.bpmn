@@ -40,11 +40,14 @@
             <camunda:inputParameter name="to">${mail.getFrom()}</camunda:inputParameter>
             <camunda:inputParameter name="subject"><![CDATA[${'RE: '.concat(mail.subject)}]]></camunda:inputParameter>
             <camunda:inputParameter name="text"><![CDATA[To print a file, send a mail with the subject 'print'. You can add the following options:
-	prints only the given pages (e.g. '-p=1', '-p=1,2', '-p=1-3')
-	prints with colors instead of gray scale
+	-p prints only the given pages (e.g. '-p=1', '-p=1,2', '-p=1-3')
+	-n prints multiple copies (e.g. '-n=2')
+	-c prints with colors instead of gray scale
+	-l prints with landscape orientation
 
 Example:
-	print -p=1 -c]]></camunda:inputParameter>
+	print -p=1 -c
+	print -n=2 -l]]></camunda:inputParameter>
           </camunda:inputOutput>
           <camunda:connectorId>mail-send</camunda:connectorId>
         </camunda:connector>

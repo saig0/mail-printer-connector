@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.camunda.bpm.printer.PrintJob;
+import org.camunda.bpm.printer.PrintJob.Orientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,12 @@ public class PrintFileCommand {
 		arguments.add("-d");
 		arguments.add(printerName);
 
+		int numberOfCopies = printJob.getNumberOfCopies();
+		if (numberOfCopies > 1) {
+			arguments.add("-n");
+			arguments.add(String.valueOf(numberOfCopies));
+		}
+		
 		getOptions(printJob).stream().forEach(option -> {
 			arguments.add("-o");
 			arguments.add(option);
@@ -71,6 +78,10 @@ public class PrintFileCommand {
 			options.add("ColorMode=RGB");
 		} else {
 			options.add("ColorMode=KGray");
+		}
+		
+		if (printJob.getOrientation() == Orientation.LANDSCAPE) {
+			options.add("landscape");
 		}
 
 		return options;
