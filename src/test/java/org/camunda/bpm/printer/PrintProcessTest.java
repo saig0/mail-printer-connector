@@ -23,15 +23,17 @@ import org.camunda.bpm.engine.ManagementService;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.Job;
 import org.camunda.bpm.engine.runtime.JobQuery;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceQuery;
 import org.camunda.bpm.extension.mail.MailContentType;
 import org.camunda.bpm.printer.cups.PrinterService;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.icegreen.greenmail.store.FolderException;
@@ -39,7 +41,7 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = { TestConfig.class })
+@ContextConfiguration(classes = { TestConfig.class })
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PrintProcessTest {
 
@@ -157,6 +159,13 @@ public class PrintProcessTest {
 	    assertThat(GreenMailUtil.getBody(mail)).startsWith("To print a file");
 	}
 
+	@After
+	public void cleanUp() {
+		for (ProcessInstance processInstance : runtimeService.createProcessInstanceQuery().processDefinitionKey("printerMailDispatching").list()) {
+			runtimeService.deleteProcessInstance(processInstance.getId(), "test ends");
+		}
+	}
+	
 	private void sendMessageWithAttachment() throws MessagingException, AddressException, FolderException {
 		Session smtpSession = greenMail.getSmtp().createSession();
 		MimeMessage message = createMimeMessage(smtpSession, "print");

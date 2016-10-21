@@ -1,8 +1,5 @@
 package org.camunda.bpm.printer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.extension.mail.MailConnectors;
@@ -13,11 +10,10 @@ import org.camunda.bpm.extension.mail.notification.MailNotificationService;
 import org.camunda.bpm.extension.mail.service.MailService;
 import org.camunda.bpm.extension.mail.service.MailServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-public class Application {
+@Component
+public class AppStarter {
 
 	@Autowired
 	private RuntimeService runtimeService;
@@ -25,11 +21,6 @@ public class Application {
 	private MailNotificationService notificationService;
 	private MailConfiguration configuration;
 
-	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
-	}
-
-	@PostConstruct
 	public void connectToMailServer() throws Exception {
 		configuration = MailConfigurationFactory.getConfiguration();
 		notificationService = new MailNotificationService(configuration);
@@ -45,16 +36,15 @@ public class Application {
 	}
 
 	private void startProcessInstance(Mail mail) {
-		runtimeService.startProcessInstanceByKey("mailDispatching", 
+		runtimeService.startProcessInstanceByKey("printerMailDispatching", 
 				Variables.createVariables().putValue("mail", mail));
 	}
 
-	@PreDestroy
 	public void closeConnection() throws Exception {
 		notificationService.stop();
 
 		MailService mailService = MailServiceFactory.getService(configuration);
 		mailService.close();
 	}
-
+	
 }
