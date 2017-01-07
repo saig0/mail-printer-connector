@@ -1,0 +1,54 @@
+﻿
+Alle verfügbaren Drucker:
+
+> lpstat -p
+
+printer HP_Photosmart_C4600_series now printing HP_Photosmart_C4600_series-162.  enabled since Wed 16 Mar 2016 21:28:11 CET
+        Waiting for printer to become available.
+		
+
+Datei drucken:
+
+>  lp -d HP_Photosmart_C4600_series -o ColorMode=KGray test2.pdf
+
+request id is HP_Photosmart_C4600_series-169 (1 file(s))
+
+> lp -d HP_Photosmart_C4600_series -o page-rage=1 -o ColorMode=RGB test2.pdf
+
+request id is HP_Photosmart_C4600_series-171 (1 file(s))
+
+3 Kopien drucken:
+
+> lp -d HP_Photosmart_C4600_series -n 3 -o ColorMode=RGB test2.pdf
+
+Querformat:
+
+> lp -d HP_Photosmart_C4600_series -o landscape test2.pdf
+
+Aktueller Status:
+
+> lpstat -P HP_Photosmart_C4600_series
+
+HP_Photosmart_C4600_series-162 pi                7168   Wed 16 Mar 2016 21:28:11 CET
+HP_Photosmart_C4600_series-163 pi                8192   Wed 16 Mar 2016 21:33:42 CET
+
+>  lpq -P HP_Photosmart_C4600_series
+
+HP_Photosmart_C4600_series is ready and printing
+Rank    Owner   Job     File(s)                         Total Size
+active  (null)  162     untitled                        7168 bytes
+1st     (null)  163     untitled                        8192 bytes
+2nd     (null)  164     untitled                        7168 bytes
+3rd     (null)  165     untitled                        7168 bytes
+4th     (null)  166     untitled                        8192 bytes
+
+
+Drucker Optionen:
+
+> lpoptions -p HP_Photosmart_C4600_series -l
+
+PageSize/Media Size: Card3x5 Card4x6 PhotoL PhotoL.FB Photo4x6 Photo4x6.FB A6 A6.FB HV HV.FB Cabinet Cabinet.FB Photo5x7 Photo5x7.FB Card5x8 A5 A5.FB B5 B5.FB Executive 8x10 8x10.FB Letter Letter.FB *A4 A4.FB Legal EnvA2 EnvC6 EnvMonarch EnvDL Env10 EnvC5 Env6 EnvCard L L.FB Hagaki Hagaki.FB Oufuku JB5 JB5.FB 2L 2L.FB Mutsugiri Mutsugiri.FB EnvChou3 EnvChou4 Custom.WIDTHxHEIGHT
+InputSlot/Media Source: *Auto Main
+ColorModel/Output Mode: *RGB CMYGray KGray
+MediaType/Media Type: *Plain Glossy TransparencyFilm
+OutputMode/Print Quality: *Normal Best Photo FastDraft
