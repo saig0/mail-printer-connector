@@ -83,6 +83,8 @@ public class PrintFileCommand {
 		if (printJob.getOrientation() == Orientation.LANDSCAPE) {
 			options.add("landscape");
 		}
+		
+		options.add("outputorder=reverse");
 
 		return options;
 	}
